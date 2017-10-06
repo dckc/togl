@@ -58,3 +58,16 @@ data WellFormed : (x, v: Type) -> (List x) -> G[x, v] -> Type where
     -> (GG[x, v]; gamma1 |- (let x1 = v1 in g1))
     -> (GG[x, v]; gamma2 |- (let x2 = v2 in g2))
     -> (GG[x, v]; (gamma1 ++ gamma2) |- (<let x1 = v1 in g1, let x2 = v2 in g2>))
+
+syntax GE "[" [x] "," [v] "]" "|-" [v'] "in" [g] = Membership x v v' g;
+
+data Membership: (x, v: Type) -> (v': v) -> G[x, v] -> Type where
+  Ground: GE[x, v] |- v' in (v' | g)
+  Union: (GE[x, v] |- v' in g)
+    -> GE[x, v] |- v' in (g :*: g')
+  Transparency: (GE[x, v] |- v' in g)
+    -> GE[x, v] |- v' in (let x' = v' in g)
+  Link_L: (GE[x, v] |- v' in g_1)
+    -> GE[x, v] |- v' in (<let x_1 = v_1 in g_1, let x_2 = v_2 in g_2>)
+  Link_R: (GE[x, v] |- v' in g_2)
+    -> GE[x, v] |- v' in (<let x_1 = v_1 in g_1, let x_2 = v_2 in g_2>)

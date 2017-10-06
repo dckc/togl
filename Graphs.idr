@@ -71,3 +71,18 @@ data Membership: (x, v: Type) -> (v': v) -> G[x, v] -> Type where
     -> GE[x, v] |- v' in (<let x_1 = v_1 in g_1, let x_2 = v_2 in g_2>)
   Link_R: (GE[x, v] |- v' in g_2)
     -> GE[x, v] |- v' in (<let x_1 = v_1 in g_1, let x_2 = v_2 in g_2>)
+
+
+-- hmm... can we absorb, rather than reify, some of these |-s?
+syntax GI "[" [x] "," [v] "]" "|-" [g1] "=" [g2] = Equiv x v g1 g2
+
+data Equiv: (x, v: Type) -> G[x, v] -> G[x, v] -> Type where
+  Identity: GI[x, v] |- (Empty :*: g) = g
+  Symmetry: GI[x, v] |- (g1 :*: g2) = (g2 :*: g1)
+  Associativity: GI[x, v] |- (g1 :*: (g2 :*: g3)) = ((g1 :*: g2) :*: g3)
+  Permutation:  GI[x, v] |- (v1 | (vi | (vj | g))) = (v1 | (vj | (vi | g)))
+  Conservation: GI[x, v] |- (Let xx vv (Let x' vv g)) = (Let xx vv g)
+{- issue: variables / terms
+  Extrusion: (Not (GE[x, v] |- xx in g2))
+    -> GI[x, v] |- ((Let xx vv g1) :*: g2) = (Let xx vv (g1 :*: g2))
+-}

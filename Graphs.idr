@@ -86,3 +86,22 @@ data Equiv: (x, v: Type) -> G[x, v] -> G[x, v] -> Type where
   Extrusion: (Not (GE[x, v] |- xx in g2))
     -> GI[x, v] |- ((Let xx vv g1) :*: g2) = (Let xx vv (g1 :*: g2))
 -}
+
+discrete : Nat -> G[x, Nat]
+discrete Z = Empty
+discrete (S k) = ((S k) | Empty) :*: (discrete k)
+
+-- not total
+connect' : G[x, v] -> G[x, v] -> G[x, v]
+connect' (Let x1 v1 g1) (Let x2 v2 g2) = Connect x1 v1 g1 x2 v2 g2
+
+chain : Nat -> G[Nat, Nat]
+chain Z = Empty
+chain (S Z) = Let 2 1 (1|Empty)
+chain (S k) =
+ Let (2 * (S k)) (S k) (connect' (let (2 * (S k) - 1) = (S k) in ((S k)|Empty))
+                                 (chain k))
+
+cycle : Nat -> G[Nat, Nat]
+cycle Z = Empty
+cycle (S k) = connect' (chain (S k)) (chain (S Z))

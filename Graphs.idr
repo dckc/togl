@@ -1,12 +1,17 @@
 module Graph
 
+import Data.List
+import Data.List.Quantifiers
+
 -- Notes on a theory of graphs
 -- Greg Meredith
 -- https://stackedit.io/editor#!provider=couchdb&id=UdUSSGCZgNDxSIPYmMfoX5Kk
 
+Disjoint : (xs, ys : List a) -> Type
+Disjoint xs ys = All (\y => Not (Elem y xs)) ys
 
 -- TODO: nicer syntax; maybe even dsl block
--- ISSUE: x, v have to be Decideable. hasAny uses ==
+-- ISSUE: x, v have to be Dec
 
 data GraphExpression : (x: Type) -> (v: Type) -> Type where
   Empty : GraphExpression x v
@@ -42,16 +47,16 @@ data WellFormed : {x: Type} -> {v: Type}
     -> WellFormed gxv gamma (Adjoin (Right vv) g)
   Dependence :(WellFormed gxv gamma g) -> (AdmissibleVariable gxv [] xx)
     -> WellFormed gxv gamma (Adjoin (Left xx) g)
-  Juxtaposition : DecEq x => Eq x => { gamma12: List x }
+  Juxtaposition : { gamma12: List x }
     -> {auto cat : gamma12 = (gamma1 ++ gamma2)} -- work-around?
-    -> {auto disjoint :(hasAny gamma1 gamma2) = False }
+    -> {auto disjoint : Disjoint gamma1 gamma2 }
     -> (WellFormed gxv gamma1 g1) -> (WellFormed gxv gamma2 g2)
     -> WellFormed gxv gamma12 (Juxtapose g1 g2)
   Nomination :
        (WellFormed gxv gamma g) -> (AdmissibleVariable gxv [] xx)
     -> WellFormed gxv gamma (Let x v g)
-  Connection : Eq x => { gamma12: List x }
-    -> {auto disjoint :(hasAny gamma1 gamma2) = False }
+  Connection : { gamma12: List x }
+    -> {auto disjoint: Disjoint gamma1 gamma2 }
     -> {auto cat : gamma12 = (gamma1 ++ gamma2)} -- work-around?
     -> WellFormed gxv gamma1 (Let x1 v1 g1)
     -> WellFormed gxv gamma2 (Let x2 v2 g2)

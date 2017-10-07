@@ -7,6 +7,8 @@ import Data.List.Quantifiers
 -- Greg Meredith
 -- https://stackedit.io/editor#!provider=couchdb&id=UdUSSGCZgNDxSIPYmMfoX5Kk
 
+%default total
+
 Disjoint : (xs, ys : List a) -> Type
 Disjoint xs ys = All (\y => Not (Elem y xs)) ys
 
@@ -89,18 +91,20 @@ data Equiv: (x, v: Type) -> G[x, v] -> G[x, v] -> Type where
 
 discrete : Nat -> G[x, Nat]
 discrete Z = Empty
-discrete (S k) = ((S k) | Empty) :*: (discrete k)
+discrete (S n_1) = (n | Empty) :*: (discrete n_1)
+  where n = S n_1
 
--- not total
 connect' : G[x, v] -> G[x, v] -> G[x, v]
 connect' (Let x1 v1 g1) (Let x2 v2 g2) = Connect x1 v1 g1 x2 v2 g2
+connect' _ _ = Empty
 
 chain : Nat -> G[Nat, Nat]
 chain Z = Empty
 chain (S Z) = Let 2 1 (1|Empty)
-chain (S k) =
- Let (2 * (S k)) (S k) (connect' (let (2 * (S k) - 1) = (S k) in ((S k)|Empty))
-                                 (chain k))
+chain (S n_1) =
+ Let (2 * n) n (connect' (let ((2 * (S n_1)) - 1) = n in (n|Empty))
+                         (chain n_1))
+   where n = S n_1
 
 cycle : Nat -> G[Nat, Nat]
 cycle Z = Empty

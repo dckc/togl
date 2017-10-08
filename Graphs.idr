@@ -113,3 +113,34 @@ cycle (S k) = connect' (chain n) (chain _1)
     n = (S k)
     _1 = (S Z)
 
+
+-- Graph references
+
+syntax GA "[" [x] "," [v] "]" ";" [gamma] ";" [bigG] "|-" [a]  = WFGraphRef x v gamma bigG a;
+
+data WFGraphRef: (Either xv xg) -> v -> (List xv) -> (List xg) -> (a: xg) -> Type where
+  Wire: GA[x, v] ; gamma ; [a] |- a
+
+gmap : (x -> x') -> G[x, v] -> G[x', v]
+gmap f Empty = Empty
+gmap f (v | g) = v | (gmap f g)
+gmap f (x / g) = (f x) / (gmap f g)
+gmap f (g1 :*: g2) = (gmap f g1) :*: (gmap f g2)
+gmap f (Let x v g) = Let (f x) v (gmap f g)
+gmap f (<let x1 = v1 in g1, let x2 = v2 in g2>) =
+    (<let (f x1) = v1 in (gmap f g1), let (f x2) = v2 in (gmap f g2)>)
+
+-- syntax GR "[" [xv] "+" [xg] "," [v] "]" ";" [gamma] ";" [bigG] "|-" [g]  = WFGraphRef xv xg v gamma bigG g;
+
+{- I'm struggling with this bit...
+
+data WF2: xv -> xg -> v -> (List xv) -> (List xg)
+          -> (g: G[Either xv xg, v]) -> Type where
+  Lift: {xv, xg, v': Type}
+    -> (WellFormed xv v' gamma g)
+    -> WF2 xv xg v' gamma [] (gmap {x=xv} {x'=Either xv xg} {v=v'} Left g)
+
+  Bundle: {auto d1: Disjoint gamma1 gamma2}
+    -> {auto d2: Disjoint bigG1 bigG2}
+    ...
+-}

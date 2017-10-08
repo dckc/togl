@@ -95,7 +95,7 @@ discrete (S n_1) = (n | Empty) :*: (discrete n_1)
   where n = S n_1
 
 connect' : G[x, v] -> G[x, v] -> G[x, v]
-connect' (Let x1 v1 g1) (Let x2 v2 g2) = Connect x1 v1 g1 x2 v2 g2
+connect' (let x1 = v1 in g1) (let x2 = v2 in g2) = <let x1 = v1 in g1, let x2 = v2 in g2>
 connect' _ _ = Empty
 
 chain : Nat -> G[Nat, Nat]
@@ -108,4 +108,8 @@ chain (S n_1) =
 
 cycle : Nat -> G[Nat, Nat]
 cycle Z = Empty
-cycle (S k) = connect' (chain (S k)) (chain (S Z))
+cycle (S k) = connect' (chain n) (chain _1)
+  where
+    n = (S k)
+    _1 = (S Z)
+

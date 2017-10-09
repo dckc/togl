@@ -108,10 +108,9 @@ chain (S n_1) =
 
 cycle : Nat -> G[Nat, Nat]
 cycle Z = Empty
-cycle (S k) = connect' (chain n) (chain _1)
+cycle (S k) = connect' (chain n) (chain 1)
   where
     n = (S k)
-    _1 = (S Z)
 
 vertices : G[x, v] -> List v
 vertices Empty = []

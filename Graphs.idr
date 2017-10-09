@@ -112,21 +112,21 @@ cycle (S k) = connect' (chain n) (chain 1)
   where
     n = (S k)
 
-vertices : G[x, v] -> List v
+vertices : Eq v => G[x, v] -> List v
 vertices Empty = []
-vertices (v :| g) = v :: vertices g
+vertices (v :| g) = union [v] (vertices g)
 vertices (x :/ g) = vertices g
-vertices (g1 :*: g2) = vertices g1 ++ vertices g2
+vertices (g1 :*: g2) = union (vertices g1) (vertices g2)
 vertices (let x = v in g) = vertices g  -- ISSUE: is this right?
-vertices ({let x1 = v1 in g1, let x2 = v2 in g2}) = vertices g1 ++ vertices g2
+vertices ({let x1 = v1 in g1, let x2 = v2 in g2}) = union (vertices g1) (vertices g2)
 
-edges : G[x, v] -> List (v, v)
+edges : Eq v => G[x, v] -> List (v, v)
 edges Empty = []
 edges (v :| g) = edges g
 edges (x :/ g) = edges g
-edges (g1 :*: g2) = edges g1 ++ edges g2
+edges (g1 :*: g2) = union (edges g1) (edges g2)
 edges (let x = v in g) = edges g  -- ISSUE: is this right?
-edges ({let x1 = v1 in g1, let x2 = v2 in g2}) = (v1, v2) :: edges g1 ++ edges g2
+edges ({let x1 = v1 in g1, let x2 = v2 in g2}) = union [(v1, v2)] (union (edges g1) (edges g2))
 
 
 -- Graph references

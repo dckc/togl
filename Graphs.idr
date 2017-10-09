@@ -26,11 +26,11 @@ data GraphExpression : (x: Type) -> (v: Type) -> Type where
   Let : x -> v -> G[x, v] -> G[x, v]
   Connect : x -> v -> G[x, v] -> x -> v -> G[x, v] -> G[x, v]
 
-syntax [v] "|" [g]                 = Adjoin v g;
-syntax [x] "/" [g]                 = AdjoinX x g; -- hmm..
+syntax [v] ":|" [g]                 = Adjoin v g;
+syntax [x] ":/" [g]                 = AdjoinX x g; -- hmm..
 syntax [g1] ":*:" [g2]             = Juxtapose g1 g2;
 syntax "let" [x] "=" [v] "in" [g]  = Let x v g;
-syntax "<" "let" [x1] "=" [v1] "in" [g1] "," "let" [x2] "=" [v2] "in" [g2] ">" = Connect x1 v1 g1 x2 v2 g2;
+syntax "{" "let" [x1] "=" [v1] "in" [g1] "," "let" [x2] "=" [v2] "in" [g2] "}" = Connect x1 v1 g1 x2 v2 g2;
 
 syntax GV "[" [x] "," [v] "]" ";" [gamma] "|-" [v'] = AdmissibleVertex x v gamma v';
 
@@ -47,9 +47,9 @@ data AdmissibleVariable : (x, v: Type) -> (List x) -> x -> Type where
 data WellFormed : (x, v: Type) -> (List x) -> G[x, v] -> Type where
   Foundation : GG[x, v] ; [] |- Empty
   Participation : (GG[x, v] ; gamma |- g) -> (GV[x, v] ; [] |- v')
-    -> GG[x, v] ; gamma |- (v' | g)
+    -> GG[x, v] ; gamma |- (v' :| g)
   Dependence :(GG[x, v] ; gamma |- g) -> (GX[x, v] ; [] |- x')
-    -> GG[x, v] ; gamma |- (x' / g)
+    -> GG[x, v] ; gamma |- (x' :/ g)
   Juxtaposition : {auto disjoint: Disjoint gamma1 gamma2 }
     -> (GG[x, v]; gamma1 |- g1) -> (GG[x, v]; gamma2 |- g2)
     -> GG[x, v]; (gamma1 ++ gamma2) |- (g1 :*: g2)
@@ -59,20 +59,20 @@ data WellFormed : (x, v: Type) -> (List x) -> G[x, v] -> Type where
   Connection : {auto disjoint: Disjoint gamma1 gamma2 }
     -> (GG[x, v]; gamma1 |- (let x1 = v1 in g1))
     -> (GG[x, v]; gamma2 |- (let x2 = v2 in g2))
-    -> (GG[x, v]; (gamma1 ++ gamma2) |- (<let x1 = v1 in g1, let x2 = v2 in g2>))
+    -> (GG[x, v]; (gamma1 ++ gamma2) |- ({let x1 = v1 in g1, let x2 = v2 in g2}))
 
 syntax GE "[" [x] "," [v] "]" "|-" [v'] "in" [g] = Membership x v v' g;
 
 data Membership: (x, v: Type) -> (v': v) -> G[x, v] -> Type where
-  Ground: GE[x, v] |- v' in (v' | g)
+  Ground: GE[x, v] |- v' in (v' :| g)
   Union: (GE[x, v] |- v' in g)
     -> GE[x, v] |- v' in (g :*: g')
   Transparency: (GE[x, v] |- v' in g)
     -> GE[x, v] |- v' in (let x' = v' in g)
   Link_L: (GE[x, v] |- v' in g_1)
-    -> GE[x, v] |- v' in (<let x_1 = v_1 in g_1, let x_2 = v_2 in g_2>)
+    -> GE[x, v] |- v' in ({let x_1 = v_1 in g_1, let x_2 = v_2 in g_2})
   Link_R: (GE[x, v] |- v' in g_2)
-    -> GE[x, v] |- v' in (<let x_1 = v_1 in g_1, let x_2 = v_2 in g_2>)
+    -> GE[x, v] |- v' in ({let x_1 = v_1 in g_1, let x_2 = v_2 in g_2})
 
 
 -- hmm... can we absorb, rather than reify, some of these |-s?
@@ -82,27 +82,27 @@ data Equiv: (x, v: Type) -> G[x, v] -> G[x, v] -> Type where
   Identity: GI[x, v] |- (Empty :*: g) = g
   Symmetry: GI[x, v] |- (g1 :*: g2) = (g2 :*: g1)
   Associativity: GI[x, v] |- (g1 :*: (g2 :*: g3)) = ((g1 :*: g2) :*: g3)
-  Permutation:  GI[x, v] |- (v1 | (vi | (vj | g))) = (v1 | (vj | (vi | g)))
+  Permutation:  GI[x, v] |- (v1 :| (vi :| (vj :| g))) = (v1 :| (vj :| (vi :| g)))
   Conservation: GI[x, v] |- (Let xx vv (Let x' vv g)) = (Let xx vv g)
-{- issue: variables / terms
+{- Issue: variables / terms
   Extrusion: (Not (GE[x, v] |- xx in g2))
     -> GI[x, v] |- ((Let xx vv g1) :*: g2) = (Let xx vv (g1 :*: g2))
 -}
 
 discrete : Nat -> G[x, Nat]
 discrete Z = Empty
-discrete (S n_1) = (n | Empty) :*: (discrete n_1)
+discrete (S n_1) = (n :| Empty) :*: (discrete n_1)
   where n = S n_1
 
 connect' : G[x, v] -> G[x, v] -> G[x, v]
-connect' (let x1 = v1 in g1) (let x2 = v2 in g2) = <let x1 = v1 in g1, let x2 = v2 in g2>
+connect' (let x1 = v1 in g1) (let x2 = v2 in g2) = {let x1 = v1 in g1, let x2 = v2 in g2}
 connect' _ _ = Empty
 
 chain : Nat -> G[Nat, Nat]
 chain Z = Empty
-chain (S Z) = Let 2 1 (1|Empty)
+chain (S Z) = Let 2 1 (1 :| Empty)
 chain (S n_1) =
- Let (2 * n) n (connect' (let ((2 * (S n_1)) - 1) = n in (n|Empty))
+ Let (2 * n) n (connect' (let ((2 * (S n_1)) - 1) = n in (n :| Empty))
                          (chain n_1))
    where n = S n_1
 
@@ -123,12 +123,12 @@ data WFGraphRef: (Either xv xg) -> v -> (List xv) -> (List xg) -> (a: xg) -> Typ
 
 gmap : (x -> x') -> G[x, v] -> G[x', v]
 gmap f Empty = Empty
-gmap f (v | g) = v | (gmap f g)
-gmap f (x / g) = (f x) / (gmap f g)
+gmap f (v :| g) = v :| (gmap f g)
+gmap f (x :/ g) = (f x) :/ (gmap f g)
 gmap f (g1 :*: g2) = (gmap f g1) :*: (gmap f g2)
 gmap f (Let x v g) = Let (f x) v (gmap f g)
-gmap f (<let x1 = v1 in g1, let x2 = v2 in g2>) =
-    (<let (f x1) = v1 in (gmap f g1), let (f x2) = v2 in (gmap f g2)>)
+gmap f ({let x1 = v1 in g1, let x2 = v2 in g2}) =
+    ({let (f x1) = v1 in (gmap f g1), let (f x2) = v2 in (gmap f g2)})
 
 -- syntax GR "[" [xv] "+" [xg] "," [v] "]" ";" [gamma] ";" [bigG] "|-" [g]  = WFGraphRef xv xg v gamma bigG g;
 

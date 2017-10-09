@@ -129,6 +129,21 @@ edges (let x = v in g) = edges g  -- ISSUE: is this right?
 edges ({let x1 = v1 in g1, let x2 = v2 in g2}) = union [(v1, v2)] (union (edges g1) (edges g2))
 
 
+complete: Nat -> G[Nat, Nat]
+complete Z = Empty
+-- EDIT: paper says (discrete 1)
+complete (S n_1) = combineAll (discrete n) (complete n_1)
+  where
+    n = S n_1
+    combineAll : G[Nat, Nat] -> G[Nat, Nat] -> G[Nat, Nat]
+    combineAll g1 g2 = foldr Juxtapose (g1 :*: g2) [
+      {let x1 = x in g1, let x2 = y in g2}
+        | x <- (vertices g1), y <- (vertices g2)]
+      where
+        -- ISSUE: where do x1, x2 come from?
+        x1 = 1
+        x2 = 2
+
 -- Graph references
 
 syntax GA "[" [x] "," [v] "]" ";" [gamma] ";" [bigG] "|-" [a]  = WFGraphRef x v gamma bigG a;

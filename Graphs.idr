@@ -1,4 +1,4 @@
-module Graph
+module Graphs
 
 import Data.List
 import Data.List.Quantifiers
@@ -24,13 +24,13 @@ data GraphExpression : (x: Type) -> (v: Type) -> Type where
   AdjoinX : x -> G[x, v] -> G[x, v]
   Juxtapose : G[x, v] -> G[x, v] -> G[x, v]
   Let : x -> v -> G[x, v] -> G[x, v]
-  Connect : x -> v -> G[x, v] -> x -> v -> G[x, v] -> G[x, v]
+  Connect : G[x, v] -> G[x, v] -> G[x, v]
 
-syntax [v] ":|" [g]                 = Adjoin v g;
-syntax [x] ":/" [g]                 = AdjoinX x g; -- hmm..
+syntax [v] ":|" [g]                = Adjoin v g;
+syntax [x] ":/" [g]                = AdjoinX x g; -- hmm..
 syntax [g1] ":*:" [g2]             = Juxtapose g1 g2;
 syntax "let" [x] "=" [v] "in" [g]  = Let x v g;
-syntax "{" "let" [x1] "=" [v1] "in" [g1] "," "let" [x2] "=" [v2] "in" [g2] "}" = Connect x1 v1 g1 x2 v2 g2;
+syntax "{" [g1] "," [g2] "}"       = Connect g1 g2;
 
 syntax GV "[" [x] "," [v] "]" ";" [gamma] "|-" [v'] = AdmissibleVertex x v gamma v';
 
@@ -118,7 +118,7 @@ vertices (v :| g) = union [v] (vertices g)
 vertices (x :/ g) = vertices g
 vertices (g1 :*: g2) = union (vertices g1) (vertices g2)
 vertices (let x = v in g) = vertices g  -- ISSUE: is this right?
-vertices ({let x1 = v1 in g1, let x2 = v2 in g2}) = union (vertices g1) (vertices g2)
+vertices ({g1, g2}) = union (vertices g1) (vertices g2)
 
 edges : Eq v => G[x, v] -> List (v, v)
 edges Empty = []
@@ -127,6 +127,7 @@ edges (x :/ g) = edges g
 edges (g1 :*: g2) = union (edges g1) (edges g2)
 edges (let x = v in g) = edges g  -- ISSUE: is this right?
 edges ({let x1 = v1 in g1, let x2 = v2 in g2}) = union [(v1, v2)] (union (edges g1) (edges g2))
+edges ({_, _}) = []
 
 
 complete: Nat -> G[Nat, Nat]
@@ -141,6 +142,7 @@ complete (S n_1) = combineAll (discrete n) (complete n_1)
         | x <- (vertices g1), y <- (vertices g2)]
       where
         -- ISSUE: where do x1, x2 come from?
+        -- ISSUE: hard-coding these doesn't satisfy disjointness constraints
         x1 = 1
         x2 = 2
 
@@ -156,9 +158,10 @@ gmap f Empty = Empty
 gmap f (v :| g) = v :| (gmap f g)
 gmap f (x :/ g) = (f x) :/ (gmap f g)
 gmap f (g1 :*: g2) = (gmap f g1) :*: (gmap f g2)
-gmap f (Let x v g) = Let (f x) v (gmap f g)
+gmap f (let x = v in g) = let (f x) = v in (gmap f g)
 gmap f ({let x1 = v1 in g1, let x2 = v2 in g2}) =
     ({let (f x1) = v1 in (gmap f g1), let (f x2) = v2 in (gmap f g2)})
+gmap f ({_, _}) = Empty
 
 -- syntax GR "[" [xv] "+" [xg] "," [v] "]" ";" [gamma] ";" [bigG] "|-" [g]  = WFGraphRef xv xg v gamma bigG g;
 

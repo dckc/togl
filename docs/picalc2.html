@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>picalc2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/contrib/auto-render.min.js"></script><script>document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body);
+  });</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="toward-pi-calculus-in-idris">Toward <span class="math inline">\(\pi\)</span>-calculus in idris</h1>
+<p><em>WIP by <a href="http://www.madmode.com/contact/">Dan Connolly</a>, Apr 2018</em></p>
+<p><em>This is a <a href="http://docs.idris-lang.org/en/latest/tutorial/miscellany.html#literate-programming">literate idris</a> document, with idris code …</em></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">module</span> picalc2</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="fu">%</span>access export</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="fu">%</span>default total</a></code></pre></div>
+<p><em>… interspersed with text from …</em></p>
+<ul>
+<li>Milner, Robin. <em><a href="https://pdfs.semanticscholar.org/5d25/0a3a14f68abb1ae0111d35b8220b4472b277.pdf">The polyadic π-calculus: a tutorial.</a></em> In Logic and algebra of specification, pp. 203-246. Springer, Berlin, Heidelberg, 1993.</li>
+</ul>
+<p><em>We’re having some fun with <a href="https://khan.github.io/KaTeX/">KaTeX</a> while we’re at it.</em></p>
+<h2 id="basic-ideas">2.1 Basic ideas</h2>
+<p>The most primitive entity in <span class="math inline">\(\pi\)</span>-calculus is a <em>name</em>. Names, infinitely many, are <span class="math inline">\(x, y, ... \in \mathcal{X}\)</span>; they have no structure. In the basic version of <span class="math inline">\(\pi\)</span>-calculus which we begin with, there is only one other kind of entity; a <em>process</em>. Processes are <span class="math inline">\(P, Q, ... \in \mathcal{P}\)</span> and are built from names by this syntax</p>
+<p><span class="math display">\[P ::= \Sigma_{i\in I}\pi_i.P_i \;|\; P|Q \;|\; !P \;|\; (\nu x)P\]</span></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co">{- `mutual` lets us forward reference Action from Process.-}</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">mutual</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">  <span class="fu">|||</span> <span class="dt">Processes</span> are built from names, so <span class="ot">`Process`</span> is a</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">  <span class="fu">|||</span> <span class="kw">type</span> constructor from names<span class="fu">.</span></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">  <span class="kw">data</span> <span class="dt">Process</span> <span class="fu">:</span> {name<span class="fu">:</span> <span class="dt">Type</span>} <span class="ot">-&gt;</span> <span class="dt">Type</span> <span class="kw">where</span></a></code></pre></div>
+<p>The summation form represents a process able to take part in one – but only one – of several alternatives for communication.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb3-1" data-line-number="1">    <span class="dt">Sum</span><span class="fu">:</span> (<span class="dt">List</span> (<span class="dt">Action</span> {name}, <span class="dt">Process</span> {name})) <span class="ot">-&gt;</span> <span class="dt">Process</span> {name}</a></code></pre></div>
+<p><span class="math inline">\(P | Q\)</span> – “<span class="math inline">\(P\)</span> par <span class="math inline">\(Q\)</span>” – simply means that <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> are concurrently active.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb4-1" data-line-number="1">    <span class="dt">Par</span><span class="fu">:</span> (<span class="dt">P</span><span class="fu">:</span> <span class="dt">Process</span> {name}) <span class="ot">-&gt;</span> (<span class="dt">Q</span><span class="fu">:</span> <span class="dt">Process</span> {name}) <span class="ot">-&gt;</span> <span class="dt">Process</span> {name}</a></code></pre></div>
+<p><span class="math inline">\(!P\)</span> – “bang <span class="math inline">\(P\)</span>” means <span class="math inline">\(P|P|...\)</span> as many copies as you wish.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb5-1" data-line-number="1">    <span class="dt">Replication</span><span class="fu">:</span> (<span class="dt">P</span><span class="fu">:</span> <span class="dt">Process</span> {name}) <span class="ot">-&gt;</span> <span class="dt">Process</span> {name}</a></code></pre></div>
+<p><span class="math inline">\((\nu x)P\)</span> – “new <span class="math inline">\(x\)</span> in <span class="math inline">\(P\)</span>” – restricts the use of the name <span class="math inline">\(x\)</span> to <span class="math inline">\(P\)</span>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb6-1" data-line-number="1">    <span class="dt">New</span><span class="fu">:</span> (x<span class="fu">:</span> name) <span class="ot">-&gt;</span> (<span class="dt">P</span><span class="fu">:</span> <span class="dt">Process</span> {name}) <span class="ot">-&gt;</span> <span class="dt">Process</span> {name}</a></code></pre></div>
+<p>In a summand <span class="math inline">\(\pi.P\)</span> the prefix <span class="math inline">\(\pi\)</span> represents an <em>atomic action</em>, the first action performed by <span class="math inline">\(\pi.P\)</span>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb7-1" data-line-number="1">  <span class="kw">data</span> <span class="dt">Action</span> <span class="fu">:</span> {name<span class="fu">:</span> <span class="dt">Type</span>} <span class="ot">-&gt;</span> <span class="dt">Type</span> <span class="kw">where</span></a></code></pre></div>
+<p>There are two basic forms of prefix:</p>
+<ul>
+<li><span class="math inline">\(x(y)\)</span>, which binds <span class="math inline">\(y\)</span> in the prefix process, means “input some name – call it <span class="math inline">\(y\)</span> – along the link named <span class="math inline">\(x\)</span>”</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb8-1" data-line-number="1">    <span class="dt">Input</span><span class="fu">:</span> (x<span class="fu">:</span> name) <span class="ot">-&gt;</span> (y<span class="fu">:</span> name) <span class="ot">-&gt;</span> <span class="dt">Action</span> {name}</a></code></pre></div>
+<ul>
+<li><span class="math inline">\(\bar{x}y\)</span> , which does not bind <span class="math inline">\(y\)</span>, means “output the name <span class="math inline">\(y\)</span> along the link named <span class="math inline">\(x\)</span>”.</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb9-1" data-line-number="1">    <span class="dt">Output</span><span class="fu">:</span> (x<span class="fu">:</span> name) <span class="ot">-&gt;</span> (y<span class="fu">:</span> name) <span class="ot">-&gt;</span> <span class="dt">Action</span> {name}</a></code></pre></div>
+<p>In the case <span class="math inline">\(I = \emptyset\)</span>, we write the sum as <span class="math inline">\(0\)</span>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb10-1" data-line-number="1">zero<span class="fu">:</span> <span class="dt">Process</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2">zero <span class="fu">=</span> <span class="dt">Sum</span> []</a></code></pre></div>
+<p>We call <span class="math inline">\(x\)</span> the <em>subject</em> …</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb11-1" data-line-number="1">subject<span class="fu">:</span> <span class="dt">Action</span> {name} <span class="ot">-&gt;</span> name</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">subject (<span class="dt">Input</span> x y) <span class="fu">=</span> x</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">subject (<span class="dt">Output</span> x y) <span class="fu">=</span> x</a></code></pre></div>
+<p>We call … <span class="math inline">\(y\)</span> the <em>object</em></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb12-1" data-line-number="1">object<span class="fu">:</span> <span class="dt">Action</span> {name} <span class="ot">-&gt;</span> name</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">object (<span class="dt">Input</span> x y) <span class="fu">=</span> y</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">object (<span class="dt">Output</span> x y) <span class="fu">=</span> y</a></code></pre></div>
+<h2 id="some-simple-examples">2.2 Some simple examples</h2>
+<p><em>typo?</em></p>
+<p>Note that <span class="math inline">\(R\)</span> has become <span class="math inline">\(\bar{y}v\)</span> or <span class="math inline">\(\bar{z}v\)</span>; …</p>
+<p><em>should be:</em></p>
+<p>Note that <span class="math inline">\(Q\)</span> has become <span class="math inline">\(\bar{y}v\)</span> or <span class="math inline">\(\bar{z}v\)</span>; …</p>
+<p><em>no?</em></p>
+<h2 id="structural-congruence">2.3 Structural Congruence</h2>
+<p><em>Note: In order to convince idris of the <a href="http://docs.idris-lang.org/en/latest/reference/misc.html?highlight=assert_smaller#totality-checking-assertions">totality</a> of <code>fn</code> and <code>bn</code>, we use <code>assert_smaller</code> to help it understand that <code>(Sum rest)</code> is structurally smaller than <code>(Sum ((pi, P) :: rest))</code>.</em></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode literate haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb13-1" data-line-number="1">mutual</a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">  <span class="fu">|||</span> free names <span class="kw">of</span> a process</a>
+<a class="sourceLine" id="cb13-3" data-line-number="3">  fn<span class="fu">:</span> <span class="dt">Eq</span> name <span class="ot">=&gt;</span> (<span class="dt">Process</span> {name}) <span class="ot">-&gt;</span> (<span class="dt">List</span> name)</a>
+<a class="sourceLine" id="cb13-4" data-line-number="4">  fn (<span class="dt">Sum</span> []) <span class="fu">=</span> []</a>
+<a class="sourceLine" id="cb13-5" data-line-number="5">  fn (<span class="dt">Sum</span> ((pi, <span class="dt">P</span>)<span class="ot"> ::</span> rest)) <span class="fu">=</span> (fna pi) <span class="fu">++</span> (fn <span class="dt">P</span>) <span class="fu">++</span></a>
+<a class="sourceLine" id="cb13-6" data-line-number="6">   (fn (assert_smaller (<span class="dt">Sum</span> ((pi, <span class="dt">P</span>)<span class="ot"> ::</span> rest)) (<span class="dt">Sum</span> rest)))</a>
+<a class="sourceLine" id="cb13-7" data-line-number="7">  fn (<span class="dt">Par</span> <span class="dt">P</span> <span class="dt">Q</span>) <span class="fu">=</span> (fn <span class="dt">P</span>) <span class="fu">++</span> (fn <span class="dt">Q</span>)</a>
+<a class="sourceLine" id="cb13-8" data-line-number="8">  fn (<span class="dt">Replication</span> <span class="dt">P</span>) <span class="fu">=</span> fn <span class="dt">P</span></a>
+<a class="sourceLine" id="cb13-9" data-line-number="9">  fn (<span class="dt">New</span> x <span class="dt">P</span>) <span class="fu">=</span> delete x (fn <span class="dt">P</span>)</a>
+<a class="sourceLine" id="cb13-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb13-11" data-line-number="11">  <span class="fu">|||</span> free names <span class="kw">of</span> an action</a>
+<a class="sourceLine" id="cb13-12" data-line-number="12">  fna<span class="fu">:</span> (<span class="dt">Action</span> {name}) <span class="ot">-&gt;</span> (<span class="dt">List</span> name)</a>
+<a class="sourceLine" id="cb13-13" data-line-number="13">  fna (<span class="dt">Input</span> x y) <span class="fu">=</span> [x]</a>
+<a class="sourceLine" id="cb13-14" data-line-number="14">  fna (<span class="dt">Output</span> x y) <span class="fu">=</span> [x, y]</a>
+<a class="sourceLine" id="cb13-15" data-line-number="15"></a>
+<a class="sourceLine" id="cb13-16" data-line-number="16">mutual</a>
+<a class="sourceLine" id="cb13-17" data-line-number="17">  <span class="fu">|||</span> bound names <span class="kw">of</span> a process</a>
+<a class="sourceLine" id="cb13-18" data-line-number="18">  bn<span class="fu">:</span> (<span class="dt">Process</span> {name}) <span class="ot">-&gt;</span> (<span class="dt">List</span> name)</a>
+<a class="sourceLine" id="cb13-19" data-line-number="19">  bn (<span class="dt">Sum</span> []) <span class="fu">=</span> []</a>
+<a class="sourceLine" id="cb13-20" data-line-number="20">  bn (<span class="dt">Sum</span> ((pi, <span class="dt">P</span>)<span class="ot"> ::</span> rest)) <span class="fu">=</span> (bna pi) <span class="fu">++</span> (bn <span class="dt">P</span>) <span class="fu">++</span></a>
+<a class="sourceLine" id="cb13-21" data-line-number="21">   (bn (assert_smaller (<span class="dt">Sum</span> ((pi, <span class="dt">P</span>)<span class="ot"> ::</span> rest)) (<span class="dt">Sum</span> rest)))</a>
+<a class="sourceLine" id="cb13-22" data-line-number="22">  bn (<span class="dt">Par</span> <span class="dt">P</span> <span class="dt">Q</span>) <span class="fu">=</span> (bn <span class="dt">P</span>) <span class="fu">++</span> (bn <span class="dt">Q</span>)</a>
+<a class="sourceLine" id="cb13-23" data-line-number="23">  bn (<span class="dt">Replication</span> <span class="dt">P</span>) <span class="fu">=</span> bn <span class="dt">P</span></a>
+<a class="sourceLine" id="cb13-24" data-line-number="24">  bn (<span class="dt">New</span> x <span class="dt">P</span>) <span class="fu">=</span> [x] <span class="fu">++</span> (bn <span class="dt">P</span>)</a>
+<a class="sourceLine" id="cb13-25" data-line-number="25"></a>
+<a class="sourceLine" id="cb13-26" data-line-number="26">  <span class="fu">|||</span> bound names <span class="kw">of</span> an action</a>
+<a class="sourceLine" id="cb13-27" data-line-number="27">  bna<span class="fu">:</span> (<span class="dt">Action</span> {name}) <span class="ot">-&gt;</span> (<span class="dt">List</span> name)</a>
+<a class="sourceLine" id="cb13-28" data-line-number="28">  bna (<span class="dt">Input</span> x y) <span class="fu">=</span> [y]</a>
+<a class="sourceLine" id="cb13-29" data-line-number="29">  bna (<span class="dt">Output</span> x y) <span class="fu">=</span> []</a>
+<a class="sourceLine" id="cb13-30" data-line-number="30"></a>
+<a class="sourceLine" id="cb13-31" data-line-number="31">  <span class="fu">|||</span> _names_ <span class="kw">of</span> a process</a>
+<a class="sourceLine" id="cb13-32" data-line-number="32">  n<span class="fu">:</span> <span class="dt">Eq</span> name <span class="ot">=&gt;</span> <span class="dt">Process</span> {name} <span class="ot">-&gt;</span> (<span class="dt">List</span> name)</a>
+<a class="sourceLine" id="cb13-33" data-line-number="33">  n <span class="dt">P</span> <span class="fu">=</span> (bn <span class="dt">P</span>) <span class="fu">++</span> (fn <span class="dt">P</span>)</a></code></pre></div>
+<p><em>Yay… idris can now compute:</em></p>
+<pre><code>λΠ&gt; bn (Sum [((Output &quot;x&quot; &quot;y&quot;), zero)])
+[] : List String
+λΠ&gt; fn (Sum [((Output &quot;x&quot; &quot;y&quot;), zero)])
+[&quot;x&quot;, &quot;y&quot;] : List String</code></pre>
+<p><em>next step(s): use techniques from <a href="https://github.com/leithaus/rhocaml">rhocaml</a> to define structural equivalence and then prove the laws.</em></p>
+<style type="text/css">
+.sourceCode { background: azure }
+</style>
+</body>
+</html>

@@ -1,0 +1,5 @@
+package study
+
+brief = "a study of a Theory of Graphs and Rho Calculus"
+author = "Dan Connolly"
+modules = picalc2

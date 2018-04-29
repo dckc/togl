@@ -39,6 +39,9 @@ by this syntax
 
 > {- `mutual` lets us forward reference Action from Process.-}
 > 
+> syntax [p] "|" [q] = Par p q;
+> syntax "!" [p] = (Replicated p);
+>
 > mutual
 >   ||| Processes are built from names, so `Process` is a
 >   ||| type constructor from names.
@@ -56,12 +59,11 @@ concurrently active.
 
 $!P$ -- "bang $P$" means $P|P|...$ as many copies as you wish.
 
->     Replication: (P: Process {name}) -> Process {name}
+>     Replicated: (P: Process {name}) -> Process {name}
 
 $(\nu x)P$ -- "new $x$ in $P$" -- restricts the use of the name $x$ to $P$. 
 
 >     New: (x: name) -> (P: Process {name}) -> Process {name}
-
 
 In a summand $\pi.P$ the prefix $\pi$ represents an _atomic action_,
 the first action performed by $\pi.P$.
@@ -124,10 +126,10 @@ is structurally smaller than `(Sum ((pi, P) :: rest))`._
 >   ||| free names of a process
 >   fn: Eq name => (Process {name}) -> (List name)
 >   fn (Sum []) = []
->   fn (Sum ((pi, P) :: rest)) = (fna pi) ++ (fn P) ++
+>   fn (Sum ((pi, P) :: rest)) = (fna pi) ++ (fn P) ++ -- issue: subtract bound names? cf. https://github.com/leithaus/rhocaml/blob/master/rho.ml#L151
 >    (fn (assert_smaller (Sum ((pi, P) :: rest)) (Sum rest)))
->   fn (Par P Q) = (fn P) ++ (fn Q)
->   fn (Replication P) = fn P
+>   fn (P | Q) = (fn P) ++ (fn Q)
+>   fn (Replicated P) = fn P
 >   fn (New x P) = delete x (fn P)
 > 
 >   ||| free names of an action
@@ -141,8 +143,8 @@ is structurally smaller than `(Sum ((pi, P) :: rest))`._
 >   bn (Sum []) = []
 >   bn (Sum ((pi, P) :: rest)) = (bna pi) ++ (bn P) ++
 >    (bn (assert_smaller (Sum ((pi, P) :: rest)) (Sum rest)))
->   bn (Par P Q) = (bn P) ++ (bn Q)
->   bn (Replication P) = bn P
+>   bn (P | Q) = (bn P) ++ (bn Q)
+>   bn (Replicated P) = bn P
 >   bn (New x P) = [x] ++ (bn P)
 > 
 >   ||| bound names of an action

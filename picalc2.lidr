@@ -126,9 +126,9 @@ is structurally smaller than `(Sum ((pi, P) :: rest))`._
 >   ||| free names of a process
 >   fn: Eq name => (Process {name}) -> (List name)
 >   fn (Sum []) = []
->   fn (Sum ((pi, P) :: rest)) = (fna pi) ++ (fn P) ++ -- issue: subtract bound names? cf. https://github.com/leithaus/rhocaml/blob/master/rho.ml#L151
->    (fn (assert_smaller (Sum ((pi, P) :: rest)) (Sum rest)))
->   fn (P | Q) = (fn P) ++ (fn Q)
+>   fn (Sum ((pi, P) :: rest)) = union (fna pi) (union (fn P)
+>    (fn (assert_smaller (Sum ((pi, P) :: rest)) (Sum rest))) )
+>   fn (P | Q) = union (fn P) (fn Q)
 >   fn (Replicated P) = fn P
 >   fn (New x P) = delete x (fn P)
 > 
@@ -138,23 +138,23 @@ is structurally smaller than `(Sum ((pi, P) :: rest))`._
 >   fna (Output x y) = [x, y]
 > 
 > mutual
->   ||| bound names of a process
->   bn: (Process {name}) -> (List name)
->   bn (Sum []) = []
->   bn (Sum ((pi, P) :: rest)) = (bna pi) ++ (bn P) ++
->    (bn (assert_smaller (Sum ((pi, P) :: rest)) (Sum rest)))
->   bn (P | Q) = (bn P) ++ (bn Q)
->   bn (Replicated P) = bn P
->   bn (New x P) = [x] ++ (bn P)
-> 
->   ||| bound names of an action
->   bna: (Action {name}) -> (List name)
->   bna (Input x y) = [y]
->   bna (Output x y) = []
->
 >   ||| _names_ of a process
 >   n: Eq name => Process {name} -> (List name)
->   n P = (bn P) ++ (fn P)
+>   n (Sum []) = []
+>   n (Sum ((pi, P) :: rest)) = union (n' pi) (union (n P)
+>          (n (assert_smaller (Sum ((pi, P) :: rest)) (Sum rest))) )
+>     where
+>     n': (Action {name}) -> (List name)
+>     n' (Input x y) = [x, y]
+>     n' (Output x y) = [x, y]
+>   n (P | Q) = union (n P) (n Q)
+>   n (Replicated P) = n P
+>   n (New x P) = union [x] (n P)
+>
+>   ||| bound names of a process
+>   bn: Eq name => (Process {name}) -> (List name)
+>   bn P = (n P) \\ (fn P)
+
 
 _Yay... idris can now compute:_
 

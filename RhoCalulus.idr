@@ -56,6 +56,22 @@ parstar (proclisthd :: proclisttl) = foldl par proclisthd proclisttl
 quote : Process -> Name
 quote proc = Quote proc
 
+mutual
+  processQuoteDepth: Process -> Nat  -- TODO: prove totality
+  processQuoteDepth Zero = 0
+  processQuoteDepth (Input (Act nsubj nobj) cont) =
+    maximum (nameQuoteDepth nsubj) (processQuoteDepth cont)
+  processQuoteDepth (Lift nsubj cont) =
+    maximum (nameQuoteDepth nsubj) (processQuoteDepth cont)
+  processQuoteDepth (Drop n) = nameQuoteDepth n
+  processQuoteDepth (Par procs) =
+   assert_total $ foldl (\qD, proc => maximum qD (processQuoteDepth proc))
+         0
+         procs
+
+  nameQuoteDepth: Name -> Nat
+  nameQuoteDepth (Quote proc) = assert_total $ 1 + (processQuoteDepth proc)
+
 syntax [x] "[" [y] "]" = output x y
 output : Name -> Name -> Process
 output x y = Lift x $ Drop y
